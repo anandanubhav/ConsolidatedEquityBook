@@ -1,5 +1,7 @@
 package main.com.aa.feed;
 
+import java.util.Objects;
+
 public class BookLevel {
 
     private final double bidPrice, offerPrice;
@@ -36,5 +38,14 @@ public class BookLevel {
                 ", bidSize=" + bidSize +
                 ", offerSize=" + offerSize +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookLevel bookLevel = (BookLevel) o;
+        return Double.compare(bookLevel.bidPrice, bidPrice) == 0 ||
+                Double.compare(bookLevel.offerPrice, offerPrice) == 0;
     }
 }

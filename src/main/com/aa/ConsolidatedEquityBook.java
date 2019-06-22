@@ -103,18 +103,35 @@ public class ConsolidatedEquityBook {
         switch (book.getFeedType()){
             case TOP_OF_THE_BOOK:
                 if(currentQueue != null){
-
+                    BookLevel bl = new BookLevel(book.getBidPrice(),book.getOfferPrice(),book.getBidSize(),book.getOfferSize());
+                    reorderExistingLevels(currentQueue, bl);
                 } else {
                     firstTimeTopConsolidator(book);
                 }
                 break;
             case ORDER_BOOK:
                 if(currentQueue != null){
-
+                    BookLevel bl = getOrderBookLevel(book);
+                    reorderExistingLevels(currentQueue, bl);
                 } else {
                     firstTimeOrderConsolidator(book);
                 }
                 break;
+        }
+    }
+
+    private void reorderExistingLevels(PriorityBlockingQueue<BookLevel> currentQueue, BookLevel bl) {
+        /*
+         * if level bid price or offer price match - then updated sizes
+         * else put in map - drain top 5
+         *                   if found in top 5 - then shuffle
+         *                   else remove
+         */
+
+        if (currentQueue.contains(bl)) {
+            //TODO:
+        } else {
+            currentQueue.offer(bl);
         }
     }
 
@@ -127,13 +144,18 @@ public class ConsolidatedEquityBook {
 
     private void firstTimeOrderConsolidator(Book book) {
         PriorityBlockingQueue<BookLevel> queue = new PriorityBlockingQueue<>(5,new LevelComparator());
-        BookLevel bl = null;
+        BookLevel bl = getOrderBookLevel(book);
+        queue.offer(bl);
+        consolidatedBookMap.putIfAbsent(book.getSymbol(),queue);
+    }
+
+    private BookLevel getOrderBookLevel(Book book) {
+        BookLevel bl;
         if(book.getSide() == Side.BUY) {
             bl = new BookLevel(book.getBidPrice(), -1, book.getBidSize(), -1);
         } else {
             bl = new BookLevel(-1,book.getOfferPrice(),-1,book.getOfferSize());
         }
-        queue.offer(bl);
-        consolidatedBookMap.putIfAbsent(book.getSymbol(),queue);
+        return bl;
     }
 }
