@@ -1,4 +1,4 @@
-package com.aa.feed;
+package main.com.aa.feed;
 
 public enum OrderType {
 

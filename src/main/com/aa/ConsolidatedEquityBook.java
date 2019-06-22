@@ -1,9 +1,9 @@
-package com.aa;
+package main.com.aa;
 
-import com.aa.feed.Book;
-import com.aa.feed.BookLevel;
-import com.aa.feed.LevelComparator;
-import com.aa.feed.Side;
+import main.com.aa.feed.Book;
+import main.com.aa.feed.BookLevel;
+import main.com.aa.feed.LevelComparator;
+import main.com.aa.feed.Side;
 
 import java.util.ArrayList;
 import java.util.List;
