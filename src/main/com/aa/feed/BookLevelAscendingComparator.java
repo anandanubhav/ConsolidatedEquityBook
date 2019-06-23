@@ -2,7 +2,7 @@ package main.com.aa.feed;
 
 import java.util.Comparator;
 
-public class BookLevelComparator implements Comparator<BookLevel> {
+public class BookLevelAscendingComparator implements Comparator<BookLevel> {
 
     @Override
     public int compare(BookLevel o1, BookLevel o2) {
