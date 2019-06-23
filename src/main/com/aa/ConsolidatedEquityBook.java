@@ -184,7 +184,7 @@ public class ConsolidatedEquityBook {
 
     private void reorderLevel(Book book, TradeType tradeType, PriorityBlockingQueue<BookLevel> queue, BookLevel bookLevel) {
         if (queue.contains(bookLevel)) {
-            updateSizeForExisitingBook(book, bookLevel, tradeType);
+            updateSizeForExistingBook(book, bookLevel, tradeType);
         } else {
             addAndManageSize(bookLevel, queue);
         }
@@ -197,7 +197,7 @@ public class ConsolidatedEquityBook {
         }
     }
 
-    private void updateSizeForExisitingBook(Book book, BookLevel bookLevel, TradeType tradeType) {
+    private void updateSizeForExistingBook(Book book, BookLevel bookLevel, TradeType tradeType) {
         Iterator<BookLevel> itr = consolidatedBookMap.get(book.getSymbol()).get(tradeType).iterator();
         while (itr.hasNext()) {
             BookLevel current = itr.next();
