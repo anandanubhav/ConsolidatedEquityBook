@@ -125,6 +125,7 @@ public class ConsolidatedEquityBookTest {
         Assertions.assertEquals(204,topFive.get(0).getOfferPrice());
         Assertions.assertEquals(-1,topFive.get(4).getBidPrice());
         Assertions.assertEquals(239,topFive.get(4).getOfferPrice());
+        Assertions.assertEquals(9999,topFive.get(0).getBidSize());
     }
 
 }
