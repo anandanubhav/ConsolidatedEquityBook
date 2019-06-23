@@ -12,6 +12,22 @@ public class ConsolidatedBookLevel {
         this.offerSize = offerSize;
     }
 
+    public double getBidPrice() {
+        return bidPrice;
+    }
+
+    public double getOfferPrice() {
+        return offerPrice;
+    }
+
+    public long getBidSize() {
+        return bidSize;
+    }
+
+    public long getOfferSize() {
+        return offerSize;
+    }
+
     @Override
     public String toString() {
         return "ConsolidatedBookLevel{" +

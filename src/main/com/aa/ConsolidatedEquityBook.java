@@ -3,15 +3,11 @@ package main.com.aa;
 import main.com.aa.feed.*;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class ConsolidatedEquityBook {
-
-    Logger log = Logger.getLogger("ConsolidatedEquityBook");
-
-    private final ExecutorService es = Executors.newFixedThreadPool(2);
-
     private final LinkedBlockingQueue<Book> topBookQueue = new LinkedBlockingQueue<>();
     private final LinkedBlockingQueue<Book> orderBookQueue = new LinkedBlockingQueue<>();
 
@@ -85,12 +81,10 @@ public class ConsolidatedEquityBook {
                     Book oldBook = orderBookMap.get(currentBook.getOrderId());
                     switch (oldBook.getSide()) {
                         case BUY:
-                            Book updatedBidBook = new Book.Builder().fromBook(currentBook).oldSize(oldBook.getBidSize()).bidSize(currentBook.getBidSize()).build();
-                            currentBook = updatedBidBook;
+                            currentBook= new Book.Builder().fromBook(currentBook).oldSize(oldBook.getBidSize()).bidSize(currentBook.getBidSize()).build();
                             break;
                         case SELL:
-                            Book updatedOfferBook = new Book.Builder().fromBook(currentBook).oldSize(oldBook.getOfferSize()).offerSize(currentBook.getBidSize()).build();
-                            currentBook = updatedOfferBook;
+                            currentBook = new Book.Builder().fromBook(currentBook).oldSize(oldBook.getOfferSize()).offerSize(currentBook.getBidSize()).build();
                             break;
                     }
                     break;
@@ -120,28 +114,62 @@ public class ConsolidatedEquityBook {
                         break;
                     case MODIFY:
                         //go and amend quantity
+                        updateSizeForModifyOrder(book);
                         break;
                     case CANCEL:
                         //go and remove quantity and bids
+                        updateSizeForCancelOrder(book);
                         break;
                 }
                 break;
         }
     }
 
-    private void reorderExistingLevelsForNewOrder(Book book) {
+    private void updateSizeForCancelOrder(Book book) {
         TradeType tradeType = book.getSide() == Side.BUY ? TradeType.BID : TradeType.OFFER;
         PriorityBlockingQueue<BookLevel> queue = consolidatedBookMap.get(book.getSymbol()).get(tradeType);
         BookLevel bookLevel = getOrderBookLevel(book);
-        reorderLevel(book, tradeType, queue, bookLevel);
+        Iterator<BookLevel> itr = queue.iterator();
+        while (itr.hasNext()) {
+            BookLevel current = itr.next();
+            if (current.getPrice() == bookLevel.getPrice() && current.getSize() == bookLevel.getSize()) {
+                queue.remove(bookLevel);
+                break;
+            } else if(current.getPrice() == bookLevel.getPrice() ){
+                current.setSize(current.getSize() - bookLevel.getSize());
+                break;
+            }
+        }
+    }
+
+    private void updateSizeForModifyOrder(Book book) {
+        TradeType tradeType = book.getSide() == Side.BUY ? TradeType.BID : TradeType.OFFER;
+        PriorityBlockingQueue<BookLevel> queue = consolidatedBookMap.get(book.getSymbol()).get(tradeType);
+        BookLevel bookLevel = getOrderBookLevel(book);
+        Iterator<BookLevel> itr = queue.iterator();
+        while (itr.hasNext()) {
+            BookLevel current = itr.next();
+            if (current.getPrice() == bookLevel.getPrice()) {
+                current.setSize(current.getSize() + bookLevel.getSize() - book.getOldSize());
+                break;
+            }
+        }
+    }
+
+    private void reorderExistingLevelsForNewOrder(Book book) {
+        TradeType tradeType = book.getSide() == Side.BUY ? TradeType.BID : TradeType.OFFER;
+        BookLevel bookLevel = getOrderBookLevel(book);
+        PriorityBlockingQueue<BookLevel> queue = consolidatedBookMap.get(book.getSymbol()).get(tradeType);
+        if(queue == null){
+            queue = new PriorityBlockingQueue<>(5,new BookLevelComparator());
+            consolidatedBookMap.get(book.getSymbol()).put(tradeType,queue);
+            reorderLevel(book,tradeType,queue,bookLevel);
+        } else {
+            reorderLevel(book, tradeType, queue, bookLevel);
+        }
     }
 
     private void reorderExistingLevelsForTop(Book book) {
-        /*
-         * if level bid price or offer price match - then updated sizes
-         * else put and remove any extras
-         */
-
         BookLevel bid = new BookLevel(book.getBidPrice(), book.getBidSize());
         BookLevel offer = new BookLevel(book.getOfferPrice(), book.getOfferSize());
         PriorityBlockingQueue<BookLevel> bidQueue = consolidatedBookMap.get(book.getSymbol()).get(TradeType.BID);
