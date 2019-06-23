@@ -2,41 +2,37 @@ package main.com.aa.feed;
 
 import java.util.Objects;
 
-public class BookLevel {
+public class BookLevel implements  Comparable<BookLevel>{
 
-    private final double bidPrice, offerPrice;
-    private final long bidSize, offerSize;
+    private double price;
+    private long size;
 
-    public BookLevel(double bidPrice, double offerPrice, long bidSize, long offerSize) {
-        this.bidPrice = bidPrice;
-        this.offerPrice = offerPrice;
-        this.bidSize = bidSize;
-        this.offerSize = offerSize;
+    public BookLevel(double price, long size) {
+        this.price = price;
+        this.size = size;
     }
 
-    public double getBidPrice() {
-        return bidPrice;
+    public double getPrice() {
+        return price;
     }
 
-    public double getOfferPrice() {
-        return offerPrice;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
-    public long getBidSize() {
-        return bidSize;
+    public long getSize() {
+        return size;
     }
 
-    public long getOfferSize() {
-        return offerSize;
+    public void setSize(long size) {
+        this.size = size;
     }
 
     @Override
     public String toString() {
         return "BookLevel{" +
-                "bidPrice=" + bidPrice +
-                ", offerPrice=" + offerPrice +
-                ", bidSize=" + bidSize +
-                ", offerSize=" + offerSize +
+                "price=" + price +
+                ", size=" + size +
                 '}';
     }
 
@@ -45,7 +41,16 @@ public class BookLevel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BookLevel bookLevel = (BookLevel) o;
-        return Double.compare(bookLevel.bidPrice, bidPrice) == 0 ||
-                Double.compare(bookLevel.offerPrice, offerPrice) == 0;
+        return Double.compare(bookLevel.price, price) == 0;
+    }
+
+    @Override
+    public int compareTo(BookLevel o) {
+        if(this.getPrice() > o.getPrice()) {
+            return 1;
+        } else if(this.getPrice() < o.getPrice()){
+            return -1;
+        }
+        return 0;
     }
 }
